@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Zipcode Directions</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+    <link href="/static/css/style.css" rel="stylesheet">
+
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDnlmRkoX4h-Y2lEYpNPtw2SEknAVij7iM"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="/static/js/main.js"></script>
+  </head>
+
+  <body>
+    <div id="form">
+      <input class="point" id="pointA" type="text" name="pointA" placeholder="Start">
+      <input class="point" id="pointB" type="text" name="pointB" placeholder="Destination">
+      
+      <input id="submit" type="submit" value="Get directions">
+
+      <div id="message"></div>
+    </div>
+
+    <div id="map-canvas"></div>
+  </body>
+</html>

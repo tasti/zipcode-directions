@@ -1,0 +1,89 @@
+html, body, #map-canvas {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Arial;
+}
+
+#map-canvas {
+  margin: auto;
+  width: 100%;
+  height: 80%; /* Fallback */
+  height: calc(100% - 80px);
+}
+
+#form {
+  height: 80px;
+  text-align: center;
+}
+
+.point {
+  margin: auto;
+  margin-top: 8px;
+  font-size: 18px;
+  height: 24px;
+  width: 350px;
+}
+
+#submit {
+  color: white;
+  background-color: lightblue;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid lightgray;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 18px;
+  outline: none;
+}
+
+#submit.disabled {
+  cursor: auto;
+  color: white;
+  background-color: lightgray;
+}
+
+#submit:hover {
+  color: lightblue;
+  background-color: white;
+}
+
+#submit.disabled:hover {
+  color: white;
+  background-color: lightgray;
+}
+
+#submit:active {
+  -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+#message {
+  margin-top: 8px;
+  color: orange;
+  font-size: 18px;
+}
+
+@media screen and (max-width: 960px) {
+  #map-canvas {
+    height: 70%; /* Fallback */
+    height: calc(100% - 160px - 8px);
+  }
+
+  #form {
+    padding-top: 8px;
+    height: 160px;
+  }
+
+  .point {
+    margin: auto;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  #submit {
+    margin: auto;
+    margin-bottom: 8px;
+    display: block;
+  }
+}
