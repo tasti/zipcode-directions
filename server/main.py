@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from shapely.geometry import Point
 from directions import get_directions_list
 
 app = Flask(__name__)
@@ -13,10 +14,10 @@ def get_directions():
   if any([(param not in request.args) for param in params]):
     return jsonify({ 'success': False, 'message': 'all arguments not specified.' })
 
-  locationA = { 'lat': float(request.args['latA']), 'lng': float(request.args['lngA']) }
-  locationB = { 'lat': float(request.args['latB']), 'lng': float(request.args['lngB']) }
+  pointA = Point(float(request.args['lngA']), float(request.args['latA']))
+  pointB = Point(float(request.args['lngB']), float(request.args['latB']))
 
-  directions_list = get_directions_list(locationA, locationB)
+  directions_list = get_directions_list(pointA, pointB)
 
   return jsonify({ 'success': True, 'type': 'FeatureCollection', 'features': directions_list })
 

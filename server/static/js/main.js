@@ -64,32 +64,12 @@ var getRandomInt = function (min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 };
 
-/*
-  Used to detect a successful request from map.data.loadGeoJson, since the map api
-  doesn't provide a callback parameter.
-
-  setFeatureStyle() is only called after the request is made successfully, so our
-  callback is called one time when the first feature data is being added
-*/
-var isFirstCallback = function () {
-  return mapObjects.length === 3;
-};
-
-var loadGeoJsonCallback = function () {
-  enableElement('#submit');
-  $('#submit').val('Get directions');
-};
-
 var setFeatureStyle = function (feature) {
-  if (isFirstCallback()) {
-    loadGeoJsonCallback();
-  }
-
   var zipcode = feature.getProperty('ZCTA5CE10');
   var color = colors[zipcode % colors.length];
   feature.setProperty('COLOR', color);
 
-  var marker = createMarker(feature.getProperty('LAT_CENTER'), feature.getProperty('LNG_CENTER'), color);
+  var marker = createMarker(feature.getProperty('LAT_POINT'), feature.getProperty('LNG_POINT'), color);
   var infowindow = createInfoWindow(zipcode);
   mapObjects.push(marker);
 
@@ -171,10 +151,47 @@ var displayPathFromStartToDestination = function (locationA, locationB) {
   mapObjects.push(directionsPath);
 };
 
-var displayZipcodeAreas = function (locationA, locationB) {
-  // Loads the shape data onto the map
+// Intercepts any XHR requests and calls callback when the readystate changes
+var xhrInterceptorCallbacks = [];
+var xhrInterceptorInitialize = function () {
+  (function (open) {
+    XMLHttpRequest.prototype.open = function (method, url, async, user, pass) {
+      this.addEventListener("readystatechange", function () {
+        var _this = this;
+
+        xhrInterceptorCallbacks.forEach(function (callback) {
+          _this['url'] = url;
+          callback(_this);
+        });
+      }, false);
+
+      open.call(this, method, url, async, user, pass);
+    };
+  })(XMLHttpRequest.prototype.open);
+};
+
+var loadShapeData = function (locationA, locationB) {
   var url = '/api/v1/geojson?latA=' + locationA['lat'] + '&lngA=' + locationA['lng'] + '&latB=' + locationB['lat'] + '&lngB=' + locationB['lng'];
-  map.data.loadGeoJson(url); // Doesn't provide a callback option (see isFirstCallback() for fix)
+
+  /*
+    The map api doesn't provide a callback parameter, so instead we intercept the request
+    to see when it succeeds and make our callback at that point
+  */
+  map.data.loadGeoJson(url);
+  xhrInterceptorCallbacks.pop(); // We can disregard the previous callback, only need a callback for the current request
+  xhrInterceptorCallbacks.push(function (data) {
+    if ((data.url === url) && (data.readyState === 4)) { // The request for the matching url completed
+      if (data.status !== 200) {
+        $('#message').text('An unexpected error occurred: ' + data.status + ', ' + data.statusText);
+      }
+
+      enableSubmit();
+    }
+  });
+};
+
+var displayZipcodeAreas = function (locationA, locationB) {
+  loadShapeData(locationA, locationB);
 
   map.data.setStyle(setFeatureStyle);
 
@@ -199,14 +216,18 @@ var displayZipcodeAreas = function (locationA, locationB) {
   });
 };
 
-var disableElement = function (selector) {
-  $(selector).prop('disabled', true);
-  $(selector).addClass('disabled');
+var disableSubmit = function () {
+  $('#submit').prop('disabled', true);
+  $('#submit').addClass('disabled');
+
+  $('#submit').val('Loading...');
 };
 
-var enableElement = function (selector) {
-  $(selector).removeAttr('disabled');
-  $(selector).removeClass('disabled');
+var enableSubmit = function () {
+  $('#submit').removeAttr('disabled');
+  $('#submit').removeClass('disabled');
+
+  $('#submit').val('Get directions');
 };
 
 var onClickSubmit = function () {
@@ -227,8 +248,7 @@ var onClickSubmit = function () {
     return;
   }
 
-  disableElement('#submit');
-  $('#submit').val('Loading...');
+  disableSubmit();
 
   // Used to determine which promise failed
   var CALLER_A = 0, CALLER_B = 1;
@@ -260,13 +280,14 @@ var onClickSubmit = function () {
       $('#message').text('An unexpected error occurred: ' + error.status);
     }
 
-    enableElement('#submit');
-    $('#submit').val('Get directions');
+    enableSubmit();
   });
 };
 
 var main = function () {
   google.maps.event.addDomListener(window, 'load', initialize);
+
+  xhrInterceptorInitialize();
 
   // Trigger submit when enter is clicked in the input
   $('.point').keyup(function (event) {

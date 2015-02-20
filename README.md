@@ -23,3 +23,52 @@ Resources:
 
 - Zipcode Data: https://www.census.gov/geo/maps-data/data/cbf/cbf_zcta.html
 - Python lib to read shapefiles: https://pypi.python.org/pypi/Fiona. There are similar libraries available in most other languages.
+
+Setup
+===
+
+The setup instructions are meant for an OS X operating system. You should already have `python` and `pip` installed.
+
+Simply run the following commands.
+
+GDAL
+---
+
+GDAL/OGR dependency
+
+```
+  $ brew install gdal
+```
+
+virtualenv
+---
+
+If you don't already have virtualenv installed, run:
+
+```
+  $ pip install virtualenv
+```
+
+server
+---
+
+In the `server/` directory, run:
+
+```
+  $ virtualenv venv
+  $ . venv/bin/activate
+```
+
+Load the dependencies by running:
+
+```
+  $ pip install -r requirements.txt -t lib/
+```
+
+Start the server by running:
+
+```
+  $ python main.py
+```
+
+Navigate to `localhost:5000`.
